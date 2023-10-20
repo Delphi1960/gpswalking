@@ -11,17 +11,17 @@ export async function onDisplayNotification(second: number) {
   const channelId = await notifee.createChannel({
     id: 'timer_channel',
     name: 'Timer Channel',
+    vibration: false,
   });
 
-  // if (notificationId) {
-  // Если уведомление уже существует, обновляем его
-  const notificationId = await notifee.displayNotification({
+  let time = secondToHMS(second, 'HMS');
+  // const notificationId = await notifee.displayNotification({
+  await notifee.displayNotification({
     id: '123',
-    title: '<p style="color: #0014b7;"><b>Timer</span></p></b></p> 🚶',
-    body: `<p style="color: #0014b7;"><b>Прошло ${secondToHMS(
-      second,
-      'HMS',
-    )}</b></p>`,
+    title: '<p style="color: #0014b7;"><b>TIMER</b></p>🚶',
+    subtitle: 'Подзаголовок',
+    body: `<p style="color: #0014b7;"><b>Прошло ${time}</b></p>🚶`,
+
     android: {
       channelId,
       smallIcon: 'ic_launcher',
@@ -29,47 +29,24 @@ export async function onDisplayNotification(second: number) {
       pressAction: {
         id: 'default',
       },
+      // actions: [
+      //   {
+      //     title: '<b>Кнопка 1</b> ',
+      //     pressAction: {id: 'test'},
+      //   },
+      //   {
+      //     title: '<p style="color: #f44336;"><b>STOP</b> &#128557;</p>',
+      //     pressAction: {id: 'stop'},
+      //   },
+      // ],
       asForegroundService: true,
       color: AndroidColor.YELLOW,
       colorized: true,
+      progress: {
+        max: 10,
+        current: 5,
+        indeterminate: true,
+      },
     },
   });
-  // console.log(notificationId);
-  // await notifee.displayNotification({
-  //   id: notificationId,
-  //   title: '<p style="color: #0014b7;"><b>Timer</span></p></b></p> 🚶',
-  //   body: `<p style="color: #0014b7;"><b>Прошло ${secondToHMS(
-  //     second,
-  //     'HMS',
-  //   )}</b></p>`,
-  //   android: {
-  //     channelId,
-  //     smallIcon: 'ic_launcher',
-  //     largeIcon: require('../assets/images/cherry.jpg'),
-  //     pressAction: {
-  //       id: 'default',
-  //     },
-  //     asForegroundService: true,
-  //     color: AndroidColor.YELLOW,
-  //     colorized: true,
-  //   },
-  // });
-  // } else {
-  //   // Если уведомление не существует, создаем новое
-  //   notificationId = await notifee.displayNotification({
-  //     title: 'Таймер',
-  //     body: `Прошло ${secondToHMS(second, 'HMS')} `,
-  //     android: {
-  //       channelId,
-  //       smallIcon: 'ic_launcher',
-  //       largeIcon: require('../assets/images/cherry.jpg'),
-  //       pressAction: {
-  //         id: 'default',
-  //       },
-  //       asForegroundService: true,
-  //       color: AndroidColor.YELLOW,
-  //       colorized: true,
-  //     },
-  //   });
-  // }
 }

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {secondToHMS} from '../utils/secondToHMS';
 import {Button} from '@rneui/themed';
