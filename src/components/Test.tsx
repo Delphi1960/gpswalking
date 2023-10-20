@@ -1,16 +1,15 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {secondToHMS} from '../utils/secondToHMS';
 import {Button} from '@rneui/themed';
 import {storage} from '../utils/storage';
 import {onDisplayNotification} from '../utils/onDisplayNotification';
-import notifee, {EventType} from '@notifee/react-native';
+import notifee from '@notifee/react-native';
 
 let timerInterval: any = 0;
 export default function Test() {
   const [seconds, setSeconds] = useState(0);
-
-  onDisplayNotification(seconds);
+  // let notificationId: any;
 
   function startTask() {
     let sec = 0;
@@ -20,6 +19,7 @@ export default function Test() {
     timerInterval = setInterval(() => {
       sec++;
       setSeconds(sec);
+      onDisplayNotification(sec);
     }, 1000);
   }
 

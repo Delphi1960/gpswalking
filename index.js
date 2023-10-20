@@ -26,11 +26,11 @@ notifee.onBackgroundEvent(async ({type, detail}) => {
 notifee.registerForegroundService(notification => {
   return new Promise(async () => {
     let task = storage.getString('@start');
-    console.log(task, notification);
+    console.log(task, notification.body);
     // Long running task...
     if (task === 'start') {
       notifee.displayNotification({
-        id: '123',
+        id: notification.id,
         body: notification.body,
         android: {
           ...notification.android,

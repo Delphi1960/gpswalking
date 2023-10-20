@@ -34,25 +34,26 @@ export async function onDisplayNotification(second: number) {
       colorized: true,
     },
   });
-  await notifee.displayNotification({
-    id: '123',
-    title: '<p style="color: #0014b7;"><b>Timer</span></p></b></p> 🚶',
-    body: `<p style="color: #0014b7;"><b>Прошло ${secondToHMS(
-      second,
-      'HMS',
-    )}</b></p>`,
-    android: {
-      channelId,
-      smallIcon: 'ic_launcher',
-      largeIcon: require('../assets/images/cherry.jpg'),
-      pressAction: {
-        id: 'default',
-      },
-      asForegroundService: true,
-      color: AndroidColor.YELLOW,
-      colorized: true,
-    },
-  });
+  // console.log(notificationId);
+  // await notifee.displayNotification({
+  //   id: notificationId,
+  //   title: '<p style="color: #0014b7;"><b>Timer</span></p></b></p> 🚶',
+  //   body: `<p style="color: #0014b7;"><b>Прошло ${secondToHMS(
+  //     second,
+  //     'HMS',
+  //   )}</b></p>`,
+  //   android: {
+  //     channelId,
+  //     smallIcon: 'ic_launcher',
+  //     largeIcon: require('../assets/images/cherry.jpg'),
+  //     pressAction: {
+  //       id: 'default',
+  //     },
+  //     asForegroundService: true,
+  //     color: AndroidColor.YELLOW,
+  //     colorized: true,
+  //   },
+  // });
   // } else {
   //   // Если уведомление не существует, создаем новое
   //   notificationId = await notifee.displayNotification({
