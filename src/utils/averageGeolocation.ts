@@ -29,8 +29,8 @@ export function averageGeolocation(coords: Coordinate[]) {
   let centralLatitude = Math.atan2(z, centralSquareRoot);
 
   return {
-    lat: Number(((centralLatitude * 180) / Math.PI).toFixed(5)),
-    lon: Number(((centralLongitude * 180) / Math.PI).toFixed(5)),
+    lat: parseFloat(((centralLatitude * 180) / Math.PI).toFixed(5)),
+    lon: parseFloat(((centralLongitude * 180) / Math.PI).toFixed(5)),
   };
 }
 

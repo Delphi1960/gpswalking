@@ -10,6 +10,7 @@ import {storage} from './src/utils/storage';
 
 notifee.onBackgroundEvent(async ({type, detail}) => {
   const {notification} = detail;
+  // console.log(notification.body);
 
   if (type === EventType.ACTION_PRESS) {
     await notifee.cancelNotification(notification.id);
@@ -17,19 +18,12 @@ notifee.onBackgroundEvent(async ({type, detail}) => {
 });
 
 notifee.registerForegroundService(notification => {
-  let task = storage.getString('@start');
-  // console.log(task, notification.body);
   return new Promise(async () => {
-    // notifee.onForegroundEvent(async ({type, detail}) => {
-    //   if (type === EventType.ACTION_PRESS && detail.pressAction.id === 'stop') {
-    //     await notifee.stopForegroundService();
-    //   }
-    // });
-
-    // onUploadTaskEvent(async (event, upload) => {
+    let task = storage.getString('@start');
+    // console.log(task, notification.body);
     if (task === 'start') {
-      notifee.displayNotification({
-        id: notification.id,
+      await notifee.displayNotification({
+        id: '123',
         body: notification.body,
         android: {
           ...notification.android,
@@ -41,7 +35,6 @@ notifee.registerForegroundService(notification => {
       }
     }
   });
-  // });
 });
 
 AppRegistry.registerComponent(appName, () => App);

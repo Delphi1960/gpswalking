@@ -1,10 +1,11 @@
 import notifee, {AndroidColor} from '@notifee/react-native';
-import {secondToHMS} from './secondToHMS';
 
 // let notificationId: any;
 
-export async function onDisplayNotification(second: number) {
-  // Request permissions (required for iOS)
+export async function onDisplayNotification(
+  time: string,
+  distance: number = 0,
+) {
   await notifee.requestPermission();
 
   // Create a channel (required for Android)
@@ -14,39 +15,32 @@ export async function onDisplayNotification(second: number) {
     vibration: false,
   });
 
-  let time = secondToHMS(second, 'HMS');
   // const notificationId = await notifee.displayNotification({
-  await notifee.displayNotification({
-    id: '123',
-    title: '<p style="color: #0014b7;"><b>TIMER</b></p>🚶',
-    subtitle: 'Подзаголовок',
-    body: `<p style="color: #0014b7;"><b>Прошло ${time}</b></p>🚶`,
+  try {
+    await notifee.displayNotification({
+      id: '123',
+      title: '<p style="color: #0014b7;"><b>TIMER</b></p>🚶',
+      subtitle: 'Подзаголовок',
+      body:
+        '<p style="color: #0014b7;"><b>' +
+        time +
+        '</b></p>🚶<p style="color: #0014b7;"><b>' +
+        distance +
+        ' м</b></p>',
 
-    android: {
-      channelId,
-      smallIcon: 'ic_launcher',
-      largeIcon: require('../assets/images/cherry.jpg'),
-      pressAction: {
-        id: 'default',
+      android: {
+        channelId,
+        smallIcon: 'ic_launcher',
+        largeIcon: require('../assets/images/cherry.jpg'),
+        pressAction: {
+          id: 'default',
+        },
+        asForegroundService: true,
+        color: AndroidColor.YELLOW,
+        colorized: true,
       },
-      // actions: [
-      //   {
-      //     title: '<b>Кнопка 1</b> ',
-      //     pressAction: {id: 'test'},
-      //   },
-      //   {
-      //     title: '<p style="color: #f44336;"><b>STOP</b> &#128557;</p>',
-      //     pressAction: {id: 'stop'},
-      //   },
-      // ],
-      asForegroundService: true,
-      color: AndroidColor.YELLOW,
-      colorized: true,
-      progress: {
-        max: 10,
-        current: 5,
-        indeterminate: true,
-      },
-    },
-  });
+    });
+  } catch (e) {
+    console.log(e);
+  }
 }

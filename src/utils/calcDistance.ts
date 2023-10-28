@@ -1,15 +1,15 @@
 import {Coordinate} from '../types/coordLocation.type';
 
 const earthRadius = 6378137;
-const toRadius = (value: number): number => (value * Math.PI) / 180;
+const toRadian = (value: number): number => (value * Math.PI) / 180;
 
 export const calcDistance = (from: Coordinate, to: Coordinate): number => {
   const distance =
     Math.acos(
-      Math.sin(toRadius(to.lat)) * Math.sin(toRadius(from.lat)) +
-        Math.cos(toRadius(to.lat)) *
-          Math.cos(toRadius(from.lat)) *
-          Math.cos(toRadius(from.lon) - toRadius(to.lon)),
+      Math.sin(toRadian(to.lat)) * Math.sin(toRadian(from.lat)) +
+        Math.cos(toRadian(to.lat)) *
+          Math.cos(toRadian(from.lat)) *
+          Math.cos(toRadian(from.lon) - toRadian(to.lon)),
     ) * earthRadius;
 
   return Math.round(convertDistance(distance, 'm'));

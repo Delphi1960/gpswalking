@@ -1,8 +1,41 @@
-import React from 'react';
-import {PermissionsAndroid, StyleSheet, View} from 'react-native';
-import Test from './components/Test';
+import React, {useCallback, useEffect, useState} from 'react';
+import {
+  ActivityIndicator,
+  PermissionsAndroid,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
+import * as ScopedStorage from 'react-native-scoped-storage';
+import {storage} from './utils/storage';
+import BottomBar from './components/BottomBar';
+import Geolocation from '@react-native-community/geolocation';
+import {Coordinate} from './types/coordLocation.type';
 
 export default function Main() {
+  const [location, setLocation] = useState<Coordinate>({
+    lat: 0,
+    lon: 0,
+  });
+
+  const [find, setFind] = useState(false);
+
+  //Получить текущие координаты
+  const getCurrentCoordinates = useCallback(() => {
+    Geolocation.getCurrentPosition(
+      position => {
+        setLocation({
+          lat: parseFloat(position.coords.latitude.toFixed(5)),
+          lon: parseFloat(position.coords.longitude.toFixed(5)),
+        });
+      },
+      error => {
+        console.log(error.code, error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  }, []);
+
   const requestStoragePermission = async () => {
     try {
       const permissions = [
@@ -24,20 +57,51 @@ export default function Main() {
     } catch (err) {}
   };
 
-  requestStoragePermission();
+  const getWorkingDirectory = async () => {
+    let dirUri = storage.getString('@workDirectory');
 
-  return (
+    if (dirUri === undefined) {
+      let dir = await ScopedStorage.openDocumentTree(true);
+      storage.set('@workDirectory', dir.uri);
+    }
+  };
+
+  requestStoragePermission();
+  getWorkingDirectory();
+
+  useEffect(() => {
+    getCurrentCoordinates();
+    if (location.lat !== 0 && location.lon !== 0) {
+      setFind(true);
+      storage.set('@location', JSON.stringify(location));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getCurrentCoordinates, find, location.lat, location.lon]);
+
+  // console.log(find, location);
+
+  return !find ? (
     <View style={styles.container}>
-      {/* <StartTask /> */}
-      <Test />
+      <ActivityIndicator size="large" />
+      <Text style={styles.txt}>Find location...</Text>
     </View>
+  ) : (
+    <BottomBar />
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-end',
+    flexDirection: 'column',
     alignItems: 'center',
-    backgroundColor: '#F5FCCC',
+    justifyContent: 'center',
+    // backgroundColor: theme.colors.background,
+  },
+  txt: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: 'blue',
   },
 });
