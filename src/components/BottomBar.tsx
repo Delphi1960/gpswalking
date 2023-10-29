@@ -1,15 +1,14 @@
 import {createMaterialBottomTabNavigator} from '@react-navigation/material-bottom-tabs';
 import React from 'react';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import GetLocationVariant1 from './GetLocationVariant1';
-// import Map from './Map';
-import GetLocationVariant2 from './GetLocationVariant2';
+import GetLocation from './GetLocation';
 import TestGoogleMap from './TestGoogleMap';
+import WatchLocation from './WatchLocation';
 
 const Tab = createMaterialBottomTabNavigator();
 
-const GetLocationVariant1Route = () => <GetLocationVariant1 />;
-const GetLocationVariant2Route = () => <GetLocationVariant2 />;
+const GetLocationVariant1Route = () => <GetLocation />;
+const GetLocationVariant2Route = () => <WatchLocation />;
 const TestGoogleMapRoute = () => <TestGoogleMap />;
 
 export default function BottomBar() {

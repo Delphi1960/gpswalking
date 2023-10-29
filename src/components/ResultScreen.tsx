@@ -1,49 +1,61 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
-import {secondToHMS} from '../utils/secondToHMS';
-import {storage} from '../utils/storage';
-import {onDisplayNotification} from '../utils/onDisplayNotification';
-import notifee from '@notifee/react-native';
-import {useTaskTimer} from '../utils/useTaskTimer';
 import StartButtons from './StartButtons';
+import {
+  Coordinate,
+  getTotalDistance,
+} from 'calculate-distance-between-coordinates';
+import {secondToHMS} from '../utils/secondToHMS';
+import GoogleMap from './GoogleMap';
 import * as ScopedStorage from 'react-native-scoped-storage';
 import {AndroidScoped} from 'react-native-file-access';
-import {getTotalDistance} from 'calculate-distance-between-coordinates';
-import GoogleMap from './GoogleMap';
+import notifee from '@notifee/react-native';
+import {useMMKVString} from 'react-native-mmkv';
 
-export default function GetLocationVariant1() {
-  const [start, setStart] = useState('stop');
+type Props = {
+  locationArray: Coordinate[];
+  time: number;
+  distance: number;
+  path: number;
+  altitude?: number;
+  speed?: number;
+};
 
-  const data = useTaskTimer(start);
-
-  useEffect(() => {
-    onDisplayNotification(secondToHMS(data.time, 'HMS'));
-  }, [data.time]);
+export default function ResultScreen({
+  locationArray,
+  time,
+  distance,
+  path,
+  altitude,
+  speed,
+}: Props) {
+  const [, setStatus] = useMMKVString('@status');
+  const [dirUri] = useMMKVString('@workDirectory');
 
   const startButton = () => {
-    setStart('start');
-    storage.set('@start', 'start');
+    setStatus('start');
+    // storage.set('@start', 'start');
   };
   const pauseButton = () => {
-    setStart('pause');
+    setStatus('pause');
   };
   const stopButton = async () => {
     // setSeconds(0);
-    setStart('stop');
-    storage.set('@start', 'stop');
+    setStatus('stop');
+    // storage.set('@start', 'stop');
     await notifee.stopForegroundService();
 
-    let dirUri = storage.getString('@workDirectory');
+    // let dirUri = storage.getString('@workDirectory');
     let fileName = 'coordinates.gpx';
     let pathToFile = AndroidScoped.appendPath(dirUri!, fileName);
 
     const gpxData = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-  <gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">
-    ${data.averageCoords
-      .map(coord => `<wpt lat="${coord.lat}" lon="${coord.lon}"></wpt>`)
-      .join('')}
-  </gpx>`;
-
+      <gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">
+        ${locationArray
+          .map(coord => `<wpt lat="${coord.lat}" lon="${coord.lon}"></wpt>`)
+          .join('')}
+      </gpx>`;
+    // console.log(gpxData);
     await ScopedStorage.deleteFile(pathToFile);
     await ScopedStorage.writeFile(dirUri!, gpxData, fileName, 'utf8');
   };
@@ -51,27 +63,24 @@ export default function GetLocationVariant1() {
   return (
     <View style={styles.container}>
       <View style={styles.mapContainer}>
-        <GoogleMap averageCoords={data.averageCoords} />
+        <GoogleMap coords={locationArray} />
       </View>
 
       <View style={styles.dataStyle}>
-        <Text style={styles.variantStyle}>
-          Variant1. getCurrentPosition (каждые 5 сек усредняю координаты)
-        </Text>
         <View style={styles.time}>
-          <Text style={styles.textTime}>{secondToHMS(data.time, 'HMS')}</Text>
+          <Text style={styles.textTime}>{secondToHMS(time, 'HMS')}</Text>
         </View>
 
         <View style={styles.data}>
-          {data.averageCoords.length > 1 ? (
+          {locationArray.length > 1 ? (
             <View>
               <Text style={styles.textCoord}>
-                lat = {data.averageCoords[1].lat}
-                {'  '}lon = {data.averageCoords[1].lon}
+                lat = {locationArray[1].lat}
+                {'  '}lon = {locationArray[1].lon}
               </Text>
               <Text style={styles.textCoord}>
-                lat = {data.averageCoords[0].lat}
-                {'  '}lon = {data.averageCoords[0].lon}
+                lat = {locationArray[0].lat}
+                {'  '}lon = {locationArray[0].lon}
               </Text>
             </View>
           ) : (
@@ -82,19 +91,22 @@ export default function GetLocationVariant1() {
           )}
 
           <View style={[styles.data, styles.dataStep]}>
+            <Text style={styles.textData}>Step = {locationArray.length}</Text>
             <Text style={styles.textData}>
-              Step = {data.averageCoords.length}
+              dS = {distance.toFixed()} m {'   '}
             </Text>
-            <Text style={styles.textData}>
-              dS = {data.distance.toFixed()} m {'   '}
-            </Text>
+            <Text style={styles.textData}>Высота = {altitude}</Text>
           </View>
         </View>
 
         <View style={styles.data}>
           <Text style={styles.textData}>
-            Путь = {data.path.toFixed(1)} m {'  '}[S2=
-            {getTotalDistance(data.averageCoords, 'km')} km]
+            Путь = {path.toFixed(1)} m {'  '}[S2=
+            {getTotalDistance(locationArray, 'km')} km]
+          </Text>
+          <Text style={styles.textData}>
+            {' '}
+            {'        '}Скорость = {speed}
           </Text>
         </View>
       </View>

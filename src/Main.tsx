@@ -11,13 +11,14 @@ import {storage} from './utils/storage';
 import BottomBar from './components/BottomBar';
 import Geolocation from '@react-native-community/geolocation';
 import {Coordinate} from './types/coordLocation.type';
+import {useMMKVObject} from 'react-native-mmkv';
 
 export default function Main() {
   const [location, setLocation] = useState<Coordinate>({
     lat: 0,
     lon: 0,
   });
-
+  const [coord, setCoord] = useMMKVObject<Coordinate>('@location');
   const [find, setFind] = useState(false);
 
   //Получить текущие координаты
@@ -73,14 +74,15 @@ export default function Main() {
     getCurrentCoordinates();
     if (location.lat !== 0 && location.lon !== 0) {
       setFind(true);
-      storage.set('@location', JSON.stringify(location));
+      // storage.set('@location', JSON.stringify(location));
+      setCoord(location);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getCurrentCoordinates, find, location.lat, location.lon]);
 
   // console.log(find, location);
 
-  return !find ? (
+  return coord?.lat === 0 || (undefined && coord?.lon === 0) || undefined ? (
     <View style={styles.container}>
       <ActivityIndicator size="large" />
       <Text style={styles.txt}>Find location...</Text>

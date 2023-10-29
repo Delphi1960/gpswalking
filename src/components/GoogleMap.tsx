@@ -1,27 +1,41 @@
-import {Coordinate} from 'calculate-distance-between-coordinates';
-import React from 'react';
+import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
 import {useMMKVObject} from 'react-native-mmkv';
+import {Coordinate} from '../types/coordLocation.type';
 
 type Props = {
-  averageCoords: {lat: number; lon: number}[];
+  coords: Coordinate[];
 };
 
-export default function GoogleMap({averageCoords}: Props) {
+export default function GoogleMap({coords}: Props) {
+  if (coords === undefined) {
+    coords = [];
+  }
   const [location] = useMMKVObject<Coordinate>('@location');
   // console.log(location);
+  const [region, setRegion] = useState({
+    latitude: 46.419668,
+    longitude: 30.759625,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
   return (
     <View style={styles.container}>
       <MapView
         provider={PROVIDER_GOOGLE}
+        // showsUserLocation={true}
+        // followsUserLocation={true}
+        // showsMyLocationButton={true}
         style={styles.map}
-        initialRegion={{
-          latitude: 46.419668,
-          longitude: 30.759625,
-          latitudeDelta: 0.0922,
-          longitudeDelta: 0.0421,
-        }}
+        // initialRegion={{
+        //   latitude: 46.419668,
+        //   longitude: 30.759625,
+        //   latitudeDelta: 0.0922,
+        //   longitudeDelta: 0.0421,
+        // }}
+        region={region}
+        onRegionChangeComplete={newRegion => setRegion(newRegion)}
         zoomEnabled={true}
         zoomControlEnabled={true}
         mapType="terrain"
@@ -41,19 +55,14 @@ export default function GoogleMap({averageCoords}: Props) {
           key={1}
           title={'Terrain'}
           description={'Terrain'}
+          pinColor="green"
           coordinate={{
-            latitude:
-              averageCoords.length === 0
-                ? location?.lat!
-                : averageCoords[0].lat,
-            longitude:
-              averageCoords.length === 0
-                ? location?.lon!
-                : averageCoords[0].lon,
+            latitude: coords.length === 0 ? 0 : coords[0].lat,
+            longitude: coords.length === 0 ? 0 : coords[0].lon,
           }}
         />
         <Polyline
-          coordinates={averageCoords.map(({lat, lon}) => ({
+          coordinates={coords.map(({lat, lon}) => ({
             latitude: lat,
             longitude: lon,
           }))}
@@ -92,9 +101,9 @@ export default function GoogleMap({averageCoords}: Props) {
   //         description={'Terrain'}
   //         coordinate={{
   //           latitude:
-  //             averageCoords.length === 0 ? 46.419668 : averageCoords[0].lat,
+  //             coords.length === 0 ? 46.419668 : coords[0].lat,
   //           longitude:
-  //             averageCoords.length === 0 ? 30.759625 : averageCoords[0].lon,
+  //             coords.length === 0 ? 30.759625 : coords[0].lon,
   //         }}
   //         // coordinate={{
   //         //   latitude: 46.419668,
@@ -102,7 +111,7 @@ export default function GoogleMap({averageCoords}: Props) {
   //         // }}
   //       />
   //       <Polyline
-  //         coordinates={averageCoords.map(({lat, lon}) => ({
+  //         coordinates={coords.map(({lat, lon}) => ({
   //           latitude: lat,
   //           longitude: lon,
   //         }))}

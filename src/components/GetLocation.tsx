@@ -1,14 +1,19 @@
-import {useCallback, useEffect, useState} from 'react';
-// import Geolocation from 'react-native-geolocation-service';
-import Geolocation from '@react-native-community/geolocation';
+import React, {useCallback, useEffect, useState} from 'react';
+import {secondToHMS} from '../utils/secondToHMS';
+import {onDisplayNotification} from '../utils/onDisplayNotification';
+import ResultScreen from './ResultScreen';
+import {useMMKVString} from 'react-native-mmkv';
 import {Coordinate} from '../types/coordLocation.type';
+import Geolocation from '@react-native-community/geolocation';
+import {averageGeolocation} from '../utils/averageGeolocation';
 import {getDistanceBetweenTwoPoints} from 'calculate-distance-between-coordinates';
-import {averageGeolocation} from './averageGeolocation';
 
 const INTERVAL = 1000;
 const POINT = 5;
 
-export function useTaskTimer(status: string) {
+export default function GetLocationVariant1() {
+  const [status] = useMMKVString('@status');
+
   const [time, setTime] = useState(0);
   const [currentCoords, setCurrentCoords] = useState<Coordinate[]>([]);
   const [averageCoords, setAverageCoords] = useState<Coordinate[]>([]);
@@ -53,7 +58,6 @@ export function useTaskTimer(status: string) {
 
         getCurrentCoordinates();
       }
-      // console.log(time);
     }, INTERVAL);
     return () => clearInterval(interval);
   }, [distance, getCurrentCoordinates, path, status, time]);
@@ -81,5 +85,16 @@ export function useTaskTimer(status: string) {
     }
   }, [averageCoords, currentCoords, currentCoords.length, path]);
 
-  return {time, averageCoords, distance, path};
+  useEffect(() => {
+    onDisplayNotification(secondToHMS(time, 'HMS'));
+  }, [time]);
+
+  return (
+    <ResultScreen
+      locationArray={averageCoords}
+      time={time}
+      distance={distance}
+      path={path}
+    />
+  );
 }
