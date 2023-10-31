@@ -1,11 +1,11 @@
 import React, {useEffect, useState} from 'react';
 import {getDistanceBetweenTwoPoints} from 'calculate-distance-between-coordinates';
-import {coords} from '../../coordTest';
+import {coords} from '../utils/coordinates';
 import {useMMKVString} from 'react-native-mmkv';
 import {Coordinate} from '../types/coordLocation.type';
 import ResultScreen from './ResultScreen';
 
-const INTERVAL = 500;
+const INTERVAL = 50;
 
 export default function TestGoogleMap() {
   const [status, setStatus] = useMMKVString('@status');
@@ -53,12 +53,11 @@ export default function TestGoogleMap() {
 
   return (
     <ResultScreen
+      location={coords[0]}
       locationArray={averageCoords}
       time={time}
       distance={distance}
       path={path}
-      // altitude={altitude}
-      // speed={speed}
     />
   );
 }

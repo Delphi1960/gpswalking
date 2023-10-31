@@ -11,8 +11,11 @@ import * as ScopedStorage from 'react-native-scoped-storage';
 import {AndroidScoped} from 'react-native-file-access';
 import notifee from '@notifee/react-native';
 import {useMMKVString} from 'react-native-mmkv';
+import Geolocation from '@react-native-community/geolocation';
+import {storage} from '../utils/storage';
 
 type Props = {
+  // location: Coordinate;
   locationArray: Coordinate[];
   time: number;
   distance: number;
@@ -22,6 +25,7 @@ type Props = {
 };
 
 export default function ResultScreen({
+  // location,
   locationArray,
   time,
   distance,
@@ -34,18 +38,17 @@ export default function ResultScreen({
 
   const startButton = () => {
     setStatus('start');
-    // storage.set('@start', 'start');
   };
   const pauseButton = () => {
     setStatus('pause');
   };
   const stopButton = async () => {
-    // setSeconds(0);
+    Geolocation.clearWatch(storage.getNumber('@id')!);
+    storage.set('@data', JSON.stringify([]));
+
     setStatus('stop');
-    // storage.set('@start', 'stop');
     await notifee.stopForegroundService();
 
-    // let dirUri = storage.getString('@workDirectory');
     let fileName = 'coordinates.gpx';
     let pathToFile = AndroidScoped.appendPath(dirUri!, fileName);
 
@@ -64,6 +67,7 @@ export default function ResultScreen({
     <View style={styles.container}>
       <View style={styles.mapContainer}>
         <GoogleMap coords={locationArray} />
+        {/* <GoogleMap location={location} coords={locationArray} /> */}
       </View>
 
       <View style={styles.dataStyle}>
@@ -95,7 +99,7 @@ export default function ResultScreen({
             <Text style={styles.textData}>
               dS = {distance.toFixed()} m {'   '}
             </Text>
-            <Text style={styles.textData}>Высота = {altitude}</Text>
+            <Text style={styles.textData}>H = {altitude}</Text>
           </View>
         </View>
 
@@ -106,7 +110,7 @@ export default function ResultScreen({
           </Text>
           <Text style={styles.textData}>
             {' '}
-            {'        '}Скорость = {speed}
+            {'    '}V = {speed?.toFixed(0)}
           </Text>
         </View>
       </View>

@@ -19,9 +19,9 @@ notifee.onBackgroundEvent(async ({type, detail}) => {
 
 notifee.registerForegroundService(notification => {
   return new Promise(async () => {
-    let task = storage.getString('@start');
-    // console.log(task, notification.body);
-    if (task === 'start') {
+    let status = storage.getString('@status');
+    // console.log(status, notification.body);
+    if (status === 'start') {
       await notifee.displayNotification({
         id: '123',
         body: notification.body,
@@ -30,7 +30,7 @@ notifee.registerForegroundService(notification => {
         },
       });
     } else {
-      if (task === 'stop') {
+      if (status === 'stop') {
         await notifee.stopForegroundService();
       }
     }

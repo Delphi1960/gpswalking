@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
   PermissionsAndroid,
@@ -18,23 +18,27 @@ export default function Main() {
     lat: 0,
     lon: 0,
   });
-  const [coord, setCoord] = useMMKVObject<Coordinate>('@location');
+  const [, setCoord] = useMMKVObject<Coordinate>('@location');
   const [find, setFind] = useState(false);
 
-  //Получить текущие координаты
-  const getCurrentCoordinates = useCallback(() => {
+  useEffect(() => {
     Geolocation.getCurrentPosition(
       position => {
         setLocation({
           lat: parseFloat(position.coords.latitude.toFixed(5)),
           lon: parseFloat(position.coords.longitude.toFixed(5)),
         });
+        if (position.coords.latitude !== 0 && position.coords.longitude !== 0) {
+          setFind(true);
+          setCoord(location);
+        }
       },
       error => {
         console.log(error.code, error.message);
       },
       {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const requestStoragePermission = async () => {
@@ -71,18 +75,11 @@ export default function Main() {
   getWorkingDirectory();
 
   useEffect(() => {
-    getCurrentCoordinates();
-    if (location.lat !== 0 && location.lon !== 0) {
-      setFind(true);
-      // storage.set('@location', JSON.stringify(location));
-      setCoord(location);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getCurrentCoordinates, find, location.lat, location.lon]);
+    setCoord(location);
+    // console.log(find, location);
+  }, [find, location, setCoord]);
 
-  // console.log(find, location);
-
-  return coord?.lat === 0 || (undefined && coord?.lon === 0) || undefined ? (
+  return !find ? (
     <View style={styles.container}>
       <ActivityIndicator size="large" />
       <Text style={styles.txt}>Find location...</Text>
