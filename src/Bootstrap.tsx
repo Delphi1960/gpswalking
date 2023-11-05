@@ -1,36 +1,38 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
+
+import {useMMKVObject} from 'react-native-mmkv';
+import {storageInit} from './utils/storageInit';
 import {
   ActivityIndicator,
+  Image,
   PermissionsAndroid,
   StyleSheet,
   Text,
   View,
 } from 'react-native';
-import * as ScopedStorage from 'react-native-scoped-storage';
-import {storage} from './utils/storage';
-import BottomBar from './components/BottomBar';
 import Geolocation from '@react-native-community/geolocation';
 import {Coordinate} from './types/coordLocation.type';
-import {useMMKVObject} from 'react-native-mmkv';
+import * as ScopedStorage from 'react-native-scoped-storage';
+import {storage} from './utils/storage';
+import GpsImage from './assets/index.image';
 
-export default function Main() {
-  const [location, setLocation] = useState<Coordinate>({
-    lat: 0,
-    lon: 0,
-  });
-  const [, setCoord] = useMMKVObject<Coordinate>('@location');
-  const [find, setFind] = useState(false);
+type Props = {
+  children: React.ReactNode;
+};
 
-  useEffect(() => {
-    Geolocation.getCurrentPosition(
+export default function Bootstrap({children}: Props) {
+  storageInit();
+
+  const currentPosition = async () => {
+    await Geolocation.getCurrentPosition(
       position => {
-        setLocation({
+        setCoord({
           lat: parseFloat(position.coords.latitude.toFixed(5)),
           lon: parseFloat(position.coords.longitude.toFixed(5)),
         });
+
         if (position.coords.latitude !== 0 && position.coords.longitude !== 0) {
-          setFind(true);
-          setCoord(location);
+          setIsLocation(false);
         }
       },
       error => {
@@ -38,8 +40,7 @@ export default function Main() {
       },
       {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
     );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  };
 
   const requestStoragePermission = async () => {
     try {
@@ -58,6 +59,7 @@ export default function Main() {
 
       if (allPermissionsGranted) {
         // Все разрешения предоставлены
+        currentPosition();
       }
     } catch (err) {}
   };
@@ -71,24 +73,26 @@ export default function Main() {
     }
   };
 
+  const [, setCoord] = useMMKVObject<Coordinate>('@location');
+
+  const [isLocation, setIsLocation] = useState(true);
   requestStoragePermission();
   getWorkingDirectory();
 
-  useEffect(() => {
-    setCoord(location);
-    // console.log(find, location);
-  }, [find, location, setCoord]);
+  if (isLocation) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.imageBox}>
+          <Image source={GpsImage.search} style={styles.image} />
+        </View>
+        <ActivityIndicator size="large" />
+        <Text style={styles.txt}>Find location...</Text>
+      </View>
+    );
+  }
 
-  return !find ? (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" />
-      <Text style={styles.txt}>Find location...</Text>
-    </View>
-  ) : (
-    <BottomBar />
-  );
+  return <>{children}</>;
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -103,4 +107,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'blue',
   },
+  imageBox: {position: 'absolute', zIndex: 0},
+  image: {width: 250, height: 250},
 });

@@ -1,22 +1,19 @@
 import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import StartButtons from './StartButtons';
-import {
-  Coordinate,
-  getTotalDistance,
-} from 'calculate-distance-between-coordinates';
+import {getTotalDistance} from 'calculate-distance-between-coordinates';
 import {secondToHMS} from '../utils/secondToHMS';
 import GoogleMap from './GoogleMap';
 import * as ScopedStorage from 'react-native-scoped-storage';
 import {AndroidScoped} from 'react-native-file-access';
 import notifee from '@notifee/react-native';
-import {useMMKVString} from 'react-native-mmkv';
+import {useMMKVNumber, useMMKVString} from 'react-native-mmkv';
 import Geolocation from '@react-native-community/geolocation';
 import {storage} from '../utils/storage';
+import {LocationData} from '../types/coordLocation.type';
 
 type Props = {
-  // location: Coordinate;
-  locationArray: Coordinate[];
+  locationArray: LocationData[];
   time: number;
   distance: number;
   path: number;
@@ -25,7 +22,6 @@ type Props = {
 };
 
 export default function ResultScreen({
-  // location,
   locationArray,
   time,
   distance,
@@ -35,16 +31,22 @@ export default function ResultScreen({
 }: Props) {
   const [, setStatus] = useMMKVString('@status');
   const [dirUri] = useMMKVString('@workDirectory');
+  const [watchId, setWatchId] = useMMKVNumber('@watchId');
 
   const startButton = () => {
     setStatus('start');
   };
   const pauseButton = () => {
     setStatus('pause');
+    Geolocation.clearWatch(watchId!);
+    setWatchId(0);
   };
   const stopButton = async () => {
-    Geolocation.clearWatch(storage.getNumber('@id')!);
+    Geolocation.clearWatch(watchId!);
+    setWatchId(0);
     storage.set('@data', JSON.stringify([]));
+    storage.set('@locationData', JSON.stringify([]));
+    storage.set('@path', 0);
 
     setStatus('stop');
     await notifee.stopForegroundService();
@@ -55,7 +57,10 @@ export default function ResultScreen({
     const gpxData = `<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
       <gpx version="1.1" xmlns="http://www.topografix.com/GPX/1/1">
         ${locationArray
-          .map(coord => `<wpt lat="${coord.lat}" lon="${coord.lon}"></wpt>`)
+          .map(
+            coord =>
+              `<wpt lat="${coord.position.lat}" lon="${coord.position.lon}"></wpt>`,
+          )
           .join('')}
       </gpx>`;
     // console.log(gpxData);
@@ -79,12 +84,12 @@ export default function ResultScreen({
           {locationArray.length > 1 ? (
             <View>
               <Text style={styles.textCoord}>
-                lat = {locationArray[1].lat}
-                {'  '}lon = {locationArray[1].lon}
+                lat = {locationArray[1].position.lat}
+                {'  '}lon = {locationArray[1].position.lon}
               </Text>
               <Text style={styles.textCoord}>
-                lat = {locationArray[0].lat}
-                {'  '}lon = {locationArray[0].lon}
+                lat = {locationArray[0].position.lat}
+                {'  '}lon = {locationArray[0].position.lon}
               </Text>
             </View>
           ) : (
@@ -106,7 +111,11 @@ export default function ResultScreen({
         <View style={styles.data}>
           <Text style={styles.textData}>
             Путь = {path.toFixed(1)} m {'  '}[S2=
-            {getTotalDistance(locationArray, 'km')} km]
+            {getTotalDistance(
+              locationArray.map(item => item.position),
+              'km',
+            )}{' '}
+            km]
           </Text>
           <Text style={styles.textData}>
             {' '}

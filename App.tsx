@@ -1,13 +1,16 @@
 import React from 'react';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import Main from './src/Main';
 import {NavigationContainer} from '@react-navigation/native';
+import Bootstrap from './src/Bootstrap';
+import BottomBar from './src/components/BottomBar';
 
 function App() {
   return (
     <NavigationContainer>
       <SafeAreaProvider>
-        <Main />
+        <Bootstrap>
+          <BottomBar />
+        </Bootstrap>
       </SafeAreaProvider>
     </NavigationContainer>
   );

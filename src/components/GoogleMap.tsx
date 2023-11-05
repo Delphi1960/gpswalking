@@ -1,23 +1,19 @@
 import React, {useState} from 'react';
 import {StyleSheet, View} from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE, Polyline} from 'react-native-maps';
-import {Coordinate} from '../types/coordLocation.type';
+import {Coordinate, LocationData} from '../types/coordLocation.type';
 import {useMMKVObject} from 'react-native-mmkv';
 
 type Props = {
-  // location: Coordinate;
-  coords: Coordinate[];
+  // coords: Coordinate[];
+  coords: LocationData[];
 };
 
 export default function GoogleMap({coords}: Props) {
   if (coords === undefined) {
     coords = [];
   }
-  const [location, setLocation] = useMMKVObject<Coordinate>('@location');
-  if (location === undefined) {
-    setLocation({lat: 46.419668, lon: 30.759625});
-  }
-  // console.log(location);
+  const [location] = useMMKVObject<Coordinate>('@location');
 
   const [region, setRegion] = useState({
     latitude: location!.lat,
@@ -58,14 +54,16 @@ export default function GoogleMap({coords}: Props) {
           description={'Terrain'}
           pinColor="red"
           coordinate={{
-            latitude: coords.length === 0 ? location!.lat : coords[0].lat,
-            longitude: coords.length === 0 ? location!.lon : coords[0].lon,
+            latitude:
+              coords.length === 0 ? location!.lat : coords[0].position.lat,
+            longitude:
+              coords.length === 0 ? location!.lon : coords[0].position.lon,
           }}
         />
         <Polyline
-          coordinates={coords.map(({lat, lon}) => ({
-            latitude: lat,
-            longitude: lon,
+          coordinates={coords.map(array => ({
+            latitude: array.position.lat,
+            longitude: array.position.lon,
           }))}
           strokeColor="red" // Цвет линии
           strokeWidth={2} // Ширина линии

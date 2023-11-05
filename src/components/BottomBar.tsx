@@ -4,12 +4,14 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 // import GetLocation from './GetLocation';
 import TestGoogleMap from './TestGoogleMap';
 import WatchLocation from './WatchLocation';
+import Options from './Options';
 
 const Tab = createMaterialBottomTabNavigator();
 
 // const GetLocationVariant1Route = () => <GetLocation />;
 const GetLocationVariant2Route = () => <WatchLocation />;
 const TestGoogleMapRoute = () => <TestGoogleMap />;
+const OptonsRoute = () => <Options />;
 
 export default function BottomBar() {
   return (
@@ -24,7 +26,7 @@ export default function BottomBar() {
         name="GetLocationVariant2Route"
         component={GetLocationVariant2Route}
         options={{
-          tabBarLabel: 'Variant2',
+          tabBarLabel: 'Go',
           // eslint-disable-next-line react/no-unstable-nested-components
           tabBarIcon: ({color}) => (
             <MaterialCommunityIcons
@@ -32,6 +34,17 @@ export default function BottomBar() {
               color={color}
               size={30}
             />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="OptonsRoute"
+        component={OptonsRoute}
+        options={{
+          tabBarLabel: 'Optons',
+          // eslint-disable-next-line react/no-unstable-nested-components
+          tabBarIcon: ({color}) => (
+            <MaterialCommunityIcons name="cog" color={color} size={30} />
           ),
         }}
       />
