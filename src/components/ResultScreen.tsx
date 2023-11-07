@@ -7,44 +7,32 @@ import GoogleMap from './GoogleMap';
 import * as ScopedStorage from 'react-native-scoped-storage';
 import {AndroidScoped} from 'react-native-file-access';
 import notifee from '@notifee/react-native';
-import {useMMKVNumber, useMMKVString} from 'react-native-mmkv';
+import {useMMKVString} from 'react-native-mmkv';
 import Geolocation from '@react-native-community/geolocation';
 import {storage} from '../utils/storage';
 import {LocationData} from '../types/coordLocation.type';
 
 type Props = {
   locationArray: LocationData[];
-  time: number;
-  distance: number;
-  path: number;
-  altitude?: number;
-  speed?: number;
 };
 
-export default function ResultScreen({
-  locationArray,
-  time,
-  distance,
-  path,
-  altitude,
-  speed,
-}: Props) {
+export default function ResultScreen({locationArray}: Props) {
   const [, setStatus] = useMMKVString('@status');
   const [dirUri] = useMMKVString('@workDirectory');
-  const [watchId, setWatchId] = useMMKVNumber('@watchId');
+  const [watchId, setWatchId] = useMMKVString('@watchId');
 
   const startButton = () => {
     setStatus('start');
   };
   const pauseButton = () => {
     setStatus('pause');
-    Geolocation.clearWatch(watchId!);
-    setWatchId(0);
+    Geolocation.clearWatch(Number(watchId));
+    setWatchId('0');
   };
   const stopButton = async () => {
-    Geolocation.clearWatch(watchId!);
-    setWatchId(0);
-    storage.set('@data', JSON.stringify([]));
+    Geolocation.clearWatch(Number(watchId));
+    setWatchId('0');
+    storage.set('@lastCoords', JSON.stringify([]));
     storage.set('@locationData', JSON.stringify([]));
     storage.set('@path', 0);
 
@@ -72,12 +60,19 @@ export default function ResultScreen({
     <View style={styles.container}>
       <View style={styles.mapContainer}>
         <GoogleMap coords={locationArray} />
-        {/* <GoogleMap location={location} coords={locationArray} /> */}
       </View>
 
       <View style={styles.dataStyle}>
         <View style={styles.time}>
-          <Text style={styles.textTime}>{secondToHMS(time, 'HMS')}</Text>
+          <Text style={styles.textTime}>
+            {secondToHMS(
+              locationArray.length === 0
+                ? 0
+                : locationArray[0].time -
+                    locationArray[locationArray.length - 1].time,
+              'HMS',
+            )}
+          </Text>
         </View>
 
         <View style={styles.data}>
@@ -102,15 +97,20 @@ export default function ResultScreen({
           <View style={[styles.data, styles.dataStep]}>
             <Text style={styles.textData}>Step = {locationArray.length}</Text>
             <Text style={styles.textData}>
-              dS = {distance.toFixed()} m {'   '}
+              ΔS ={' '}
+              {locationArray?.length === 0 ? 0 : locationArray![0].stepPoint} m{' '}
+              {'   '}
             </Text>
-            <Text style={styles.textData}>H = {altitude}</Text>
+            <Text style={styles.textData}>
+              h = {locationArray?.length === 0 ? 0 : locationArray![0].altitude}
+            </Text>
           </View>
         </View>
 
         <View style={styles.data}>
           <Text style={styles.textData}>
-            Путь = {path.toFixed(1)} m {'  '}[S2=
+            S = {locationArray?.length === 0 ? 0 : locationArray![0].path} m{' '}
+            {'  '}[S2=
             {getTotalDistance(
               locationArray.map(item => item.position),
               'km',
@@ -119,7 +119,8 @@ export default function ResultScreen({
           </Text>
           <Text style={styles.textData}>
             {' '}
-            {'    '}V = {speed?.toFixed(0)}
+            {'    '}V ={' '}
+            {locationArray?.length === 0 ? 0 : locationArray![0].speed}
           </Text>
         </View>
       </View>

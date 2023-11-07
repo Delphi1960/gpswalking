@@ -14,46 +14,59 @@ export function getLocations() {
   let distance: number = 0;
   // let path: number = 0;
   let lastPath: number = 0;
-  const start = new Date();
+  // const start = new Date();
+
+  // let ii = 0;
 
   if (status === 'start') {
-    coords = JSON.parse(storage.getString('@data')!);
+    // две последние координаты
+    coords = JSON.parse(storage.getString('@lastCoords')!);
     locationData = JSON.parse(storage.getString('@locationData')!);
-    // path = storage.getNumber('@path')!;
 
     _watchId = Geolocation.watchPosition(
       position => {
+        const latitude = parseFloat(position.coords.latitude.toFixed(5));
+        const longitude = parseFloat(position.coords.longitude.toFixed(5));
+        // console.log(position.coords.altitude);
+        // две последние координаты
         coords.unshift({
-          lat: parseFloat(position.coords.latitude.toFixed(5)),
-          lon: parseFloat(position.coords.longitude.toFixed(5)),
+          lat: latitude,
+          lon: longitude,
         });
         if (coords.length > 2) {
           coords.splice(2, 1);
         }
 
         if (coords.length > 1) {
-          distance =
-            getDistanceBetweenTwoPoints(coords[1], coords[0], 'km') * 1000;
+          distance = parseFloat(
+            (
+              getDistanceBetweenTwoPoints(coords[1], coords[0], 'km') * 1000
+            ).toFixed(0),
+          );
         }
         if (locationData.length > 0) {
           lastPath = locationData[0].path;
         }
-
+        // ii = ii + 0.00005;
         locationData.unshift({
           position: {
-            lat: parseFloat(position.coords.latitude.toFixed(5)),
-            lon: parseFloat(position.coords.longitude.toFixed(5)),
+            lat: latitude,
+            lon: longitude,
           },
+
           altitude: parseFloat(position.coords.altitude?.toFixed(0)!),
           speed: parseFloat(position.coords.speed?.toFixed(0)!),
           stepPoint: distance,
-          path: lastPath + distance,
-          time: (position.timestamp - start.getTime()) / 1000,
+          path: parseFloat((lastPath + distance).toFixed(0)),
+          time: parseFloat((position.timestamp / 1000).toFixed(0)),
+          // time: parseFloat(
+          //   ((position.timestamp - start.getTime()) / 1000).toFixed(0),
+          // ),
         });
 
-        storage.set('@data', JSON.stringify(coords));
+        storage.set('@lastCoords', JSON.stringify(coords));
         storage.set('@locationData', JSON.stringify(locationData));
-        storage.set('@watchId', _watchId);
+        storage.set('@watchId', _watchId.toFixed(0));
       },
       error => {
         console.log(error);
@@ -61,15 +74,15 @@ export function getLocations() {
       {
         enableHighAccuracy: true,
         distanceFilter: JSON.parse(storage.getString('@distanceFilter')!),
-        interval: 5000,
+        interval: JSON.parse(storage.getString('@interval')!),
         fastestInterval: 2000,
       },
     );
 
-    // return () => {
-    //   if (_watchId) {
-    //     Geolocation.clearWatch(_watchId);
-    //   }
-    // };
+    return () => {
+      if (_watchId) {
+        Geolocation.clearWatch(_watchId);
+      }
+    };
   }
 }

@@ -4,8 +4,6 @@ import {storage} from './storage';
 export function storageInit() {
   let coords: Coordinate[] = [];
   let locationData: LocationData[] = [];
-  let distance: number = 0;
-  let path: number = 0;
 
   const checkKeylocation = storage.contains('@location');
   if (checkKeylocation === false) {
@@ -13,10 +11,10 @@ export function storageInit() {
     storage.set('@location', JSON.stringify(location));
   }
 
-  const checkKey = storage.contains('@data');
+  const checkKey = storage.contains('@lastCoords');
   if (checkKey === false) {
     coords = [];
-    storage.set('@data', JSON.stringify(coords));
+    storage.set('@lastCoords', JSON.stringify(coords));
   }
 
   const checkKeylocationData = storage.contains('@locationData');
@@ -25,20 +23,13 @@ export function storageInit() {
     storage.set('@locationData', JSON.stringify(locationData));
   }
 
-  const checkKeydistance = storage.contains('@distance');
-  if (checkKeydistance === false) {
-    distance = 0;
-    storage.set('@distance', distance);
-  }
-
-  const checkKeypath = storage.contains('@path');
-  if (checkKeypath === false) {
-    path = 0;
-    storage.set('@path', path);
-  }
-
   const checkKeydistanceFilter = storage.contains('@distanceFilter');
   if (checkKeydistanceFilter === false) {
-    storage.set('@distanceFilter', '0');
+    storage.set('@distanceFilter', '1');
+  }
+
+  const checkKeyinterval = storage.contains('@interval');
+  if (checkKeyinterval === false) {
+    storage.set('@interval', '5000');
   }
 }

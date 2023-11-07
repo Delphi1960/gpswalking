@@ -16,12 +16,14 @@ export default function GoogleMap({coords}: Props) {
   const [location] = useMMKVObject<Coordinate>('@location');
 
   const [region, setRegion] = useState({
-    latitude: location!.lat,
-    longitude: location!.lon,
     // latitude: 46.419668,
     // longitude: 30.759625,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
+    // latitudeDelta: 0.0922,
+
+    latitude: location!.lat,
+    longitude: location!.lon,
+    latitudeDelta: 0.0421,
+    longitudeDelta: 0.0221,
   });
   return (
     <View style={styles.container}>
@@ -47,6 +49,7 @@ export default function GoogleMap({coords}: Props) {
             // latitude: 46.419668,
             // longitude: 30.759625,
           }}
+          image={{uri: 'map'}}
         />
         <Marker
           key={1}
@@ -59,6 +62,7 @@ export default function GoogleMap({coords}: Props) {
             longitude:
               coords.length === 0 ? location!.lon : coords[0].position.lon,
           }}
+          image={{uri: 'sphere'}}
         />
         <Polyline
           coordinates={coords.map(array => ({

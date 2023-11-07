@@ -5,17 +5,25 @@ import {useMMKVObject} from 'react-native-mmkv';
 type Props = {};
 
 export default function Options({}: Props) {
-  const [stateDistanceFilter, setDistanceFilter] =
-    useMMKVObject('@distanceFilter');
+  const [distanceFilter, setDistanceFilter] = useMMKVObject('@distanceFilter');
+  const [interval, setInterval] = useMMKVObject('@interval');
 
   return (
     <View>
-      <Text>distanceFilter</Text>
+      <Text style={styles.text}>DistanceFilter</Text>
       <TextInput
         style={styles.input}
         onChangeText={setDistanceFilter}
-        value={String(stateDistanceFilter)}
+        value={String(distanceFilter)}
         placeholder="DistanceFilter"
+        keyboardType="numeric"
+      />
+      <Text style={styles.text}>Interval</Text>
+      <TextInput
+        style={styles.input}
+        onChangeText={setInterval}
+        value={String(interval)}
+        placeholder="Interval"
         keyboardType="numeric"
       />
     </View>
@@ -25,8 +33,10 @@ const styles = StyleSheet.create({
   input: {
     height: 40,
     width: 100,
-    margin: 12,
+    marginLeft: 10,
+    marginBottom: 10,
     borderWidth: 1,
     padding: 10,
   },
+  text: {marginLeft: 10},
 });

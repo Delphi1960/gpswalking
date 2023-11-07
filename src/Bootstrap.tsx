@@ -2,19 +2,13 @@ import React, {useState} from 'react';
 
 import {useMMKVObject} from 'react-native-mmkv';
 import {storageInit} from './utils/storageInit';
-import {
-  ActivityIndicator,
-  Image,
-  PermissionsAndroid,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {Image, PermissionsAndroid, StyleSheet, Text, View} from 'react-native';
 import Geolocation from '@react-native-community/geolocation';
 import {Coordinate} from './types/coordLocation.type';
 import * as ScopedStorage from 'react-native-scoped-storage';
 import {storage} from './utils/storage';
 import GpsImage from './assets/index.image';
+import {ActivityIndicator, Button} from 'react-native-paper';
 
 type Props = {
   children: React.ReactNode;
@@ -38,7 +32,11 @@ export default function Bootstrap({children}: Props) {
       error => {
         console.log(error.code, error.message);
       },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      },
     );
   };
 
@@ -85,8 +83,20 @@ export default function Bootstrap({children}: Props) {
         <View style={styles.imageBox}>
           <Image source={GpsImage.search} style={styles.image} />
         </View>
-        <ActivityIndicator size="large" />
-        <Text style={styles.txt}>Find location...</Text>
+        <View style={styles.indicator}>
+          <ActivityIndicator size="large" color="blue" />
+          <Text style={styles.txt}>Find location...</Text>
+        </View>
+        <View style={styles.but}>
+          <Button
+            textColor="red"
+            mode="text"
+            onPress={() => {
+              setIsLocation(false);
+            }}>
+            Stop Searching for a Place
+          </Button>
+        </View>
       </View>
     );
   }
@@ -101,12 +111,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     // backgroundColor: theme.colors.background,
   },
+  indicator: {marginTop: 0},
   txt: {
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
     color: 'blue',
   },
   imageBox: {position: 'absolute', zIndex: 0},
   image: {width: 250, height: 250},
+  but: {marginTop: 30},
 });
